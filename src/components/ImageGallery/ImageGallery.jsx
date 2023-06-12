@@ -88,7 +88,6 @@ export const ImageGallery = ({ openLarge, query }) => {
                         <Gallery onClick={getLargeImage}>{photos.map((photo) =>
                             <AnimatePresence  key={photo.id} mode='wait' initial={true}>
                                 <ImageGalleryItem
-
                                     link={photo.webformatURL}
                                     large={photo.largeImageURL}
                                     title={photo.tags}

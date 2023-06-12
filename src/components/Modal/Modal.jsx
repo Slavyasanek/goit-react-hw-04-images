@@ -14,7 +14,7 @@ const containerVariant = {
     exit: { scale: 0, x: '-50%', y: '0%' }
 };
 
-export const Modal =({closeModal, largeImage})=> {
+export const Modal = ({ closeModal, largeImage }) => {
 
     const closeModalByEsc = e => {
         if (e.code === 'Escape') {
@@ -29,33 +29,24 @@ export const Modal =({closeModal, largeImage})=> {
 
     useEffect(() => {
         window.addEventListener("keydown", closeModalByEsc);
-        document.body.classList.add('lock')  
+        document.body.classList.add('lock')
         return () => {
             window.removeEventListener("keydown", closeModalByEsc);
             document.body.classList.remove('lock')
         }
     })
-
-    // componentDidMount() {
-    //     window.addEventListener("keydown", this.closeModalByEsc);
-    //     document.body.classList.add('lock')
-    // }
-    // componentWillUnmount() {
-    //     window.removeEventListener("keydown", this.closeModalByEsc);
-    //     document.body.classList.remove('lock')
-    // }
-        return (
-            <Overlay onClick={closeModalByOverlay}
-                initial={"initial"}
-                animate={"isOpen"}
-                exit={"exit"}
-                variants={modalVariant}
-            >
-                <ModalWrapper variants={containerVariant}>
-                    <ModalImage src={largeImage} alt="large photo" />
-                </ModalWrapper>
-            </Overlay>
-        );
+    return (
+        <Overlay onClick={closeModalByOverlay}
+            initial={"initial"}
+            animate={"isOpen"}
+            exit={"exit"}
+            variants={modalVariant}
+        >
+            <ModalWrapper variants={containerVariant}>
+                <ModalImage src={largeImage} alt="large photo" />
+            </ModalWrapper>
+        </Overlay>
+    );
 }
 
 Modal.propTypes = {
