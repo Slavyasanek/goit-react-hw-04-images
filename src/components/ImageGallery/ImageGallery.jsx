@@ -10,6 +10,7 @@ import { ImageGalleryItem } from 'components/ImageGalleryItem/ImageGalleryItem';
 import { Button } from 'components/Button/Button';
 import { Loader } from 'components/Loader/Loader';
 import { Notification } from 'components/Notification/Notification';
+import { AnimatePresence } from 'framer-motion';
 
 const STATUS = {
     IDLE: 'idle',
@@ -83,10 +84,17 @@ export const ImageGallery = ({ openLarge, query }) => {
         return (
             <>
                 {photos.length > 0 ?
-                    (<><Gallery onClick={getLargeImage}>{photos.map((photo) =>
-                        <ImageGalleryItem key={photo.id} link={photo.webformatURL} large={photo.largeImageURL} title={photo.tags} />
-                    )}
-                    </Gallery>
+                    (<>
+                        <Gallery onClick={getLargeImage}>{photos.map((photo) =>
+                            <AnimatePresence  key={photo.id} mode='wait' initial={true}>
+                                <ImageGalleryItem
+
+                                    link={photo.webformatURL}
+                                    large={photo.largeImageURL}
+                                    title={photo.tags}
+                                />
+                            </AnimatePresence>)}
+                        </Gallery>
                         {currentPage !== maxPage && <Button loadMore={loadMore} />}
                     </>
                     )
