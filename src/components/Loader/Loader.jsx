@@ -1,8 +1,6 @@
 import { Hearts } from "react-loader-spinner";
-import React, { Component } from 'react';
 
-class Loader extends Component {
-    render() { 
+export const Loader = () => {
         return (<>
         <Hearts
         width="200"
@@ -16,7 +14,5 @@ class Loader extends Component {
         }}
         />
         </>);
-    }
 }
  
-export default Loader;

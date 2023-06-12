@@ -1,46 +1,39 @@
-import React, { Component } from 'react';
-import Searchbar from './Searchbar/Searchbar';
+import React, { useState } from 'react';
+import { Searchbar } from './Searchbar/Searchbar';
 import { Container } from './Container/Container';
-import ImageGallery from './ImageGallery/ImageGallery';
-import Modal from './Modal/Modal';
+import { ImageGallery } from './ImageGallery/ImageGallery';
+import { Modal } from './Modal/Modal';
 import { AnimatePresence } from 'framer-motion';
 
-class App extends Component {
-  state = {
-    isShowModal: false,
-    searchText: '',
-    largeImage: ''
+export const App = () => {
+  const [isShowModal, setIsShowModal] = useState(false);
+  const [searchText, setSearchText] = useState('');
+  const [largeImage, setLargeImage] = useState('');
+
+  const handleSearch = (searchText) => {
+    setSearchText(searchText);
   }
 
-  handleSearch = (searchText) => {
-    this.setState({
-      searchText: searchText
-    })
+  const openModal = (url) => {
+    setLargeImage(url);
+    setIsShowModal(true)
   }
 
-  openModal = (url) => {
-    this.setState({largeImage: url, isShowModal: true})
+  const closeModal = () => {
+    setLargeImage('');
+    setIsShowModal(false);
   }
 
-  closeModal = e => {
-    this.setState({largeImage: null, isShowModal: false})
-  }
+  return (
+    <>
+      <Searchbar handleSearch={handleSearch} />
+      <Container>
+        <ImageGallery query={searchText} openLarge={openModal} />
+      </Container>
+      <AnimatePresence>
+        {isShowModal && <Modal closeModal={closeModal} largeImage={largeImage} />}
+      </AnimatePresence>
+    </>
+  );
 
-  render() {
-    const {searchText, isShowModal, largeImage} = this.state
-    
-    return (
-      <>
-        <Searchbar handleSearch={this.handleSearch} />
-        <Container>
-          <ImageGallery query={searchText} openLarge={this.openModal}/>
-        </Container>
-        <AnimatePresence initial={true} mode='wait'>
-        {isShowModal && <Modal closeModal={this.closeModal} largeImage={largeImage}/>}
-        </AnimatePresence>
-      </>
-    );
-  }
 }
-
-export default App;

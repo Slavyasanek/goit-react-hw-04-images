@@ -1,53 +1,43 @@
-import React, { Component } from 'react';
+import { useState } from 'react';
 import { Header, SearchBtn, SearchForm, SearchInput } from './Searchbar.styled';
-import {BsFillSearchHeartFill} from 'react-icons/bs'
+import { BsFillSearchHeartFill } from 'react-icons/bs'
 import PropTypes from 'prop-types';
 
-const INITIAL_STATE = {
-    searchValue: ''
-}
 
-class Searchbar extends Component {
-    state = {
-        ...INITIAL_STATE
-    }
-    
-    static propTypes = {
-        handleSearch: PropTypes.func.isRequired,
+export const Searchbar = ({ handleSearch }) => {
+    const [searchValue, setSearchValue] = useState('');
 
-    }
-    handleSubmit = e => {
+    const handleSubmit = e => {
         e.preventDefault();
-        this.props.handleSearch(this.state.searchValue)
-        this.reset();
+        handleSearch(searchValue)
+        reset();
     }
-    handleChange = ({target: {value}}) => {
-        this.setState({
-            searchValue: value
-        })
+    const handleChange = ({ target: { value } }) => {
+        setSearchValue(value);
     }
-    reset = () => {
-        this.setState({...INITIAL_STATE})
+    const reset = () => {
+        setSearchValue('');
     }
-    render() {
-        return (
-            <Header>
-                <SearchForm onSubmit={this.handleSubmit}>
-                    <SearchInput
-                        type="text"
-                        autocomplete="off"
-                        autoFocus
-                        placeholder="Search images and photos"
-                        onChange={this.handleChange}
-                        value={this.state.searchValue}
-                    />
-                    <SearchBtn type="submit">
-                        <BsFillSearchHeartFill/>
-                    </SearchBtn>
-                </SearchForm>
-            </Header>
-        );
-    }
+
+    return (
+        <Header>
+            <SearchForm onSubmit={handleSubmit}>
+                <SearchInput
+                    type="text"
+                    autocomplete="off"
+                    autoFocus
+                    placeholder="Search images and photos"
+                    onChange={handleChange}
+                    value={searchValue}
+                />
+                <SearchBtn type="submit">
+                    <BsFillSearchHeartFill />
+                </SearchBtn>
+            </SearchForm>
+        </Header>
+    );
 }
 
-export default Searchbar;
+Searchbar.propTypes = {
+    handleSearch: PropTypes.func.isRequired,
+}

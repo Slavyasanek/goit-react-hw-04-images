@@ -30,11 +30,9 @@ export const ModalWrapper = styled(motion.div)`
     padding: 10px;
     transition: all 0.8s cubic-bezier(0.175, 0.885, 0.32, 1.275);
     @media screen and (min-width: 760px) {
-      /* min-width: 760px; */
       height: 400px;
     }
     @media screen and (min-width: 1200px) {
-      /* min-width: 1000px; */
       height: 600px;
     }
 `

@@ -1,109 +1,113 @@
-import React, { Component } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import PropTypes from 'prop-types';
 import { getImages } from 'helpers/api';
 
-import {BsBox2Heart, BsHeartbreak} from 'react-icons/bs';
+import { BsBox2Heart, BsHeartbreak } from 'react-icons/bs';
 import { Gallery } from './ImageGallery.styled';
 
 
-import ImageGalleryItem from 'components/ImageGalleryItem/ImageGalleryItem';
-import Button from 'components/Button/Button';
-import Loader from 'components/Loader/Loader';
-import Notification from 'components/Notification/Notification';
+import { ImageGalleryItem } from 'components/ImageGalleryItem/ImageGalleryItem';
+import { Button } from 'components/Button/Button';
+import { Loader } from 'components/Loader/Loader';
+import { Notification } from 'components/Notification/Notification';
 
-class ImageGallery extends Component {
-    state = {
-        photos: null,
-        status: 'idle',
-        currentPage: 0,
-        maxPage: 0,
-    }
+const STATUS = {
+    IDLE: 'idle',
+    PENDING: 'pending',
+    REJECTED: 'rejected',
+    RESOLVED: 'resolved'
+}
 
-    static propTypes = {
-        openLarge: PropTypes.func.isRequired,
-    }
+export const ImageGallery = ({ openLarge, query }) => {
+    const [photos, setPhotos] = useState([]);
+    const [status, setStatus] = useState(STATUS.IDLE);
+    const [currentPage, setCurrentPage] = useState(1);
+    const [maxPage, setMaxPage] = useState(0);
 
-    async componentDidUpdate(prevProps, _) {
-        const prevQuery = prevProps.query;
-        const newQuery = this.props.query;
-        if (prevQuery !== newQuery) {
-            this.setState({ status: 'pending' })
-            try {
-                const images = await getImages(newQuery);
-                this.setState({
-                    photos: images.hits,
-                    status: 'resolved',
-                    maxPage: Math.ceil(images.totalHits / 12),
-                    currentPage: 1
-                })
-            } catch (e) {
-                this.setState({ status: 'rejected' })
-            }
-        }
-    }
+    const searchText = useRef(query);
 
-    loadMore = async () => {
-        try {
-            const images = await getImages(this.props.query, this.state.currentPage + 1);
-            this.setState((prevState) => {
-                return {
-                    photos: [...prevState.photos, ...images.hits],
-                    status: 'resolved',
-                    currentPage: prevState.currentPage + 1
+    useEffect(() => {
+        if (!query) return;
+
+        async function fetchData() {
+            if (searchText.current !== query) {
+
+                setStatus(STATUS.PENDING);
+                searchText.current = query;
+
+                try {
+                    const images = await getImages(query, 1);
+                    setPhotos(images.hits);
+                    setStatus(STATUS.RESOLVED);
+                    setMaxPage(Math.ceil(images.totalHits / 12));
+                    setCurrentPage(1);
+                } catch (e) {
+                    setStatus(STATUS.REJECTED);
                 }
-            })
-        } catch (e) {
-            this.setState({ status: 'rejected' })
+            } else if (currentPage > 1) {
+                try {
+                    const images = await getImages(query, currentPage);
+                    setPhotos((prevPhotos) => [...prevPhotos, ...images.hits]);
+                    setStatus(STATUS.RESOLVED);
+                } catch (e) {
+                    setStatus(STATUS.REJECTED);
+                }
+            }
+
         }
+        fetchData();
+    }, [currentPage, query])
+
+    const loadMore = () => {
+        setCurrentPage(currentPage + 1);
     }
 
-    getLargeImage = e => {
+    const getLargeImage = e => {
         if (e.target === e.currentTarget) {
             return;
         }
         const currentImage = e.target.closest('img').dataset.large;
-        this.props.openLarge(currentImage)
+        openLarge(currentImage)
     }
 
-    render() {
-        const { photos, status, currentPage, maxPage } = this.state
-
-        if (status === 'idle') {
-            return (<>
-                <Notification message="Inspire yourself"
-                icon={<BsBox2Heart/>}/>
-                </>)
-        } else if (status ==='pending') {
-            return (<>
-                <Loader/>
-            </>)
-        } else if (status === 'resolved') {
-            return (
-                <>
-                  {photos.length > 0 ? 
-                    (<><Gallery onClick={this.getLargeImage}>{photos.map((photo) =>
+    if (status === STATUS.IDLE) {
+        return (<>
+            <Notification message="Inspire yourself"
+                icon={<BsBox2Heart />} />
+        </>)
+    } else if (status === STATUS.PENDING) {
+        return (<>
+            <Loader />
+        </>)
+    } else if (status === STATUS.RESOLVED) {
+        return (
+            <>
+                {photos.length > 0 ?
+                    (<><Gallery onClick={getLargeImage}>{photos.map((photo) =>
                         <ImageGalleryItem key={photo.id} link={photo.webformatURL} large={photo.largeImageURL} title={photo.tags} />
                     )}
-                </Gallery>
-                {currentPage !== maxPage && <Button loadMore={this.loadMore} />}
-                </>
-                )
-                 : (<Notification 
-                 message="No matches found"
-                 icon={<BsHeartbreak/>}
-                 />)}
-                </>
-            ) 
-        } else if (status === 'rejected') {
-            return (
-                <>
-                <Notification 
-                 message="Something went wrong"
-                 icon={<BsHeartbreak/>}/>
-                </>
-            )
-        }
+                    </Gallery>
+                        {currentPage !== maxPage && <Button loadMore={loadMore} />}
+                    </>
+                    )
+                    : (<Notification
+                        message="No matches found"
+                        icon={<BsHeartbreak />}
+                    />)}
+            </>
+        )
+    } else if (status === STATUS.REJECTED) {
+        return (
+            <>
+                <Notification
+                    message="Something went wrong"
+                    icon={<BsHeartbreak />} />
+            </>
+        )
     }
 }
 
-export default ImageGallery;
+ImageGallery.propTypes = {
+    openLarge: PropTypes.func.isRequired,
+    query: PropTypes.string
+}

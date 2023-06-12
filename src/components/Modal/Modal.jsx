@@ -1,4 +1,4 @@
-import React, { Component } from 'react';
+import React, { useEffect } from 'react';
 import { ModalImage, ModalWrapper, Overlay } from './Modal.styled';
 import PropTypes from 'prop-types';
 
@@ -14,34 +14,38 @@ const containerVariant = {
     exit: { scale: 0, x: '-50%', y: '0%' }
 };
 
-class Modal extends Component {
-    static propTypes = {
-        closeModal: PropTypes.func.isRequired,
-        largeImage: PropTypes.string.isRequired
+export const Modal =({closeModal, largeImage})=> {
+
+    const closeModalByEsc = e => {
+        if (e.code === 'Escape') {
+            closeModal();
+        }
+    }
+    const closeModalByOverlay = e => {
+        if (e.target === e.currentTarget) {
+            closeModal();
+        }
     }
 
-    closeModalByEsc = (e) => {
-        if (e.code === 'Escape') {
-            this.props.closeModal();
+    useEffect(() => {
+        window.addEventListener("keydown", closeModalByEsc);
+        document.body.classList.add('lock')  
+        return () => {
+            window.removeEventListener("keydown", closeModalByEsc);
+            document.body.classList.remove('lock')
         }
-    }
-    closeModalByOverlay = e => {
-        if (e.target === e.currentTarget) {
-            this.props.closeModal();
-        }
-    }
-    componentDidMount() {
-        window.addEventListener("keydown", this.closeModalByEsc);
-        document.body.classList.add('lock')
-    }
-    componentWillUnmount() {
-        window.removeEventListener("keydown", this.closeModalByEsc);
-        document.body.classList.remove('lock')
-    }
-    render() {
-        const {largeImage} = this.props
+    })
+
+    // componentDidMount() {
+    //     window.addEventListener("keydown", this.closeModalByEsc);
+    //     document.body.classList.add('lock')
+    // }
+    // componentWillUnmount() {
+    //     window.removeEventListener("keydown", this.closeModalByEsc);
+    //     document.body.classList.remove('lock')
+    // }
         return (
-            <Overlay onClick={this.closeModalByOverlay}
+            <Overlay onClick={closeModalByOverlay}
                 initial={"initial"}
                 animate={"isOpen"}
                 exit={"exit"}
@@ -52,7 +56,9 @@ class Modal extends Component {
                 </ModalWrapper>
             </Overlay>
         );
-    }
 }
 
-export default Modal;
+Modal.propTypes = {
+    closeModal: PropTypes.func.isRequired,
+    largeImage: PropTypes.string.isRequired
+}
